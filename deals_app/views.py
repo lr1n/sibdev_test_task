@@ -9,6 +9,7 @@ def add_deal(request):
         form = DealsForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
+            print(type(form))
             return HttpResponseRedirect('/')
     else:
         form = DealsForm()
