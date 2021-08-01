@@ -8,6 +8,6 @@ from .views import (
 
 
 urlpatterns = [
-    path('add_deal/', add_deal, name='add_deal'),
-    path('', IndexView.as_view(), name='index'),
+    path('', add_deal, name='add_deal'),
+    path('index/', IndexView.as_view(), name='index'),
 ]

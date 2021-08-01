@@ -6,7 +6,7 @@ class DealsModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'Deal from {self.created_at}'
+        return f'{self.upload_deal.name[19:]}'
 
     class Meta:
         verbose_name = 'Deal'

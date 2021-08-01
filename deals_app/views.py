@@ -2,6 +2,7 @@ import csv
 import io
 import codecs
 from django.http.response import HttpResponseRedirect
+from django.contrib import messages
 from django.shortcuts import render
 from django.views.generic import ListView
 
@@ -11,19 +12,27 @@ from .models import DealsModel, DataFromDealsFiles
 
 def add_deal(request):
     if request.method == 'POST':
+        csv_file = request.FILES['upload_deal']
+        data = csv_file.read().decode('utf-8')
+        io_string = io.StringIO(data)
+        next(io_string)
+        for c in csv.reader(io_string, delimiter=','):
+            _, created = DataFromDealsFiles.objects.update_or_create(
+                customer=c[0],
+                item=c[1],
+                total=c[2],
+                quantity=c[3],
+                date=c[4]
+            )
+        # file = form.cleaned_data['upload_deal']
+        # processed_csv_file = csv.reader(
+        #     codecs.iterdecode(file, 'utf-8')
+        # )
+        # next(processed_csv_file)
         form = DealsForm(request.POST, request.FILES)
         if form.is_valid():
-            # csv_file = form.cleaned_data['upload_deal']
-            # processed_csv_file = csv.reader(
-            #     codecs.iterdecode(csv_file, 'utf-8')
-            # )
-            # for el in processed_csv_file:
-            #     print(el)
-            # form.save()
-            csv_file = request.FILES['upload_deal']
-            data = csv_file.read().decode('utf-8')
-            print(type(data))
-            return HttpResponseRedirect('/')
+            form.save()
+            return HttpResponseRedirect('index/')
     else:
         form = DealsForm()
     return render(request, 'deals_app/add_deal.html', {'form': form})
