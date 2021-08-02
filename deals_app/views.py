@@ -63,7 +63,6 @@ def add_deal(request):
                 )
                 d.save()
             processed_data = process_csv(reader)
-            print(processed_data)
             # for c in csv.reader(io_str, delimiter=','):
             #     _, created = DataFromDealsFiles.objects.update_or_create(
             #         customer=c[0],
