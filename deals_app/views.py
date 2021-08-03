@@ -1,15 +1,18 @@
 import csv
 import io
 
-from django.http.response import HttpResponseRedirect
+from django.http import JsonResponse
 from django.shortcuts import render
-from django.views.generic import ListView
 
 from .forms import DealsForm
-from .models import DealsModel, DataFromDealsFiles
+from .models import DataFromDealsFiles
 
 
 def process_csv(reader):
+    """This function takes a csv reader and handle it with our needs
+
+    Returns: a list with dicts
+    """
     customers = set()
     data = dict()
 
@@ -40,7 +43,14 @@ def process_csv(reader):
             if gem in el[2] and gems.count(gem) < 2:
                 el[2].remove(gem)
 
-    return data_5_items
+    for el in data_5_items:
+        el[2] = list(el[2])
+
+    res_data = []
+    for el in data_5_items:
+        res_data.append({'username': el[0], 'spent_money': el[1], 'gems': el[2]})
+
+    return res_data
 
 
 def add_deal(request):
@@ -50,7 +60,20 @@ def add_deal(request):
         if file.name.endswith('.csv'):
             d = file.read().decode('utf-8')
             io_str = io.StringIO(d)
-            next(io_str)
+            # skip header
+            headers = next(io_str).split(',')
+            needed_headers = [
+                'customer', 'item', 'total', 'quantity', 'date\r\n'
+            ]
+            # check if structure of csv file matches our needs
+            for el in needed_headers:
+                if el not in headers:
+                    return JsonResponse(
+                        {
+                            'Status': 'Error',
+                            'Desc': 'You\'ve uploaded a .csv file with wrong headers'
+                        }
+                    )
             reader = csv.reader(io_str, delimiter=',')
             reader = list(reader)
             for el in reader:
@@ -63,35 +86,29 @@ def add_deal(request):
                 )
                 d.save()
             processed_data = process_csv(reader)
-            # for c in csv.reader(io_str, delimiter=','):
-            #     _, created = DataFromDealsFiles.objects.update_or_create(
-            #         customer=c[0],
-            #         item=c[1],
-            #         total=c[2],
-            #         quantity=c[3],
-            #         date=c[4]
-            #     )
             if form.is_valid():
                 form.save()
-                return render(
-                    request,
-                    'deals_app/processed_deal.html',
-                    {'processed_data': processed_data}
+                return JsonResponse(
+                    {'Response': processed_data},
+                    json_dumps_params={'ensure_ascii': False}
                 )
         else:
             if form.is_valid():
-                form.save()
-                return HttpResponseRedirect('index/')
+                response = {
+                    'Status': 'Error',
+                    'Desc': 'Please upload a .csv file'
+                }
+                return JsonResponse(response)
     else:
         form = DealsForm()
     return render(request, 'deals_app/add_deal.html', {'form': form})
 
 
-class IndexView(ListView):
-    model = DealsModel
-    template_name = 'deals_app/index.html'
-    context_object_name = 'deals'
+# class IndexView(ListView):
+#     model = DealsModel
+#     template_name = 'deals_app/index.html'
+#     context_object_name = 'deals'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         return context
