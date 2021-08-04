@@ -14,4 +14,4 @@ In terminal insert this command 'python manage.py runserver'|
 ------------------------------ |
 If you don't have Docker, [install it](https://docs.docker.com/get-docker/)|
 Open the terminal and insert 'sudo docker pull lr1n/sibdev_rest:latestt'|
-In the terminal insert 'sudo docker run --name sibdev_app -d --rm --publish 8000:8000 lr1n/sibdev'|
+In the terminal insert 'sudo docker run --name sibdev_app -d --rm --publish 8000:8000 lr1n/sibdev_rest'|
