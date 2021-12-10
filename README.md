@@ -1,5 +1,3 @@
-# Test task for Sibdev
-
 **Information for launching:** |
 ------------------------------ |
 Open the terminal and insert 'git clone https://github.com/lr1n/sibdev_test_task'|
